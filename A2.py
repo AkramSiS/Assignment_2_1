@@ -2,6 +2,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 
 
 # Load the dataset from your local drive
@@ -22,7 +24,7 @@ print(f"Total missing values: {missing_values}")
 unique_values = df.nunique()
 total_values = df.count()
 
-# Combine unique and total values into a single DataFrame
+# Combire unique and total values into a single DataFrame
 unique_vs_total = pd.DataFrame({
     'Unique Values': unique_values,
     'Total Values': total_values
@@ -46,6 +48,50 @@ print(distinct_categories)
 data_types = df.dtypes
 print("\nData types of each column:")
 print(data_types)
+
+
+
+
+
+# Assuming your dataset is already loaded into the 'df' DataFrame
+
+# Step 1: Selecting only numeric columns
+numeric_df = df.select_dtypes(include=['int64', 'float64'])
+
+# Step 2: Standardize the data (mean = 0, variance = 1)
+scaler = StandardScaler()
+scaled_data = scaler.fit_transform(numeric_df)
+
+# Step 3: Apply PCA
+pca = PCA()
+pca.fit(scaled_data)
+
+# Step 4: Calculate the explained variance for each component
+explained_variance_ratio = pca.explained_variance_ratio_
+
+# Cumulative explained variance
+cumulative_variance = pca.explained_variance_ratio_.cumsum()
+
+plt.figure(figsize=(10, 6))
+plt.plot(range(1, len(cumulative_variance) + 1), cumulative_variance, marker='o', linestyle='--', color='r')
+plt.title('Cumulative Explained Variance by Principal Components')
+plt.xlabel('Principal Components')
+plt.ylabel('Cumulative Explained Variance')
+plt.show()
+
+
+# Get the loadings (contributions of each feature to each principal component)
+loadings = pd.DataFrame(pca.components_.T, columns=[f'PC{i+1}' for i in range(12)], index=numeric_df.columns)
+
+# Display the loadings
+print(loadings)
+
+
+
+
+
+
+
 
 # 6. Correlation matrix (for numerical columns only)
 numeric_df = df.select_dtypes(include=['int64', 'float64'])  # Select only numeric columns
